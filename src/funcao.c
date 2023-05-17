@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "funcao.h"
 
 muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int capital, int codigo_uf, char *siafi_id, int ddd, char *fuso_horario){
@@ -9,8 +10,8 @@ muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int cap
 
 	municipios->cod_ibge = cod_ibge;
 	strcpy(municipios->nome ,nome);
-	municipios->coord[0] = coord0;
-	municipios->coord[1] = coord1; 
+	municipios->coord.coord[0] = coord0;
+	municipios->coord.coord[1] = coord1; 
 	municipios->capital = capital;
 	municipios->codigo_uf = codigo_uf;
 	strcpy(municipios->siafi_id, siafi_id);
@@ -137,8 +138,8 @@ fast *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, doub
 	strcpy(fastfood->categoria, categoria);
 	strcpy(fastfood->cidade, cidade);
 	strcpy(fastfood->pais, pais);
-	fastfood->coord[0] = coord0;
-	fastfood->coord[1] = coord1;
+	fastfood->coord.coord[0] = coord0;
+	fastfood->coord.coord[1] = coord1;
 	strcpy(fastfood->nome, nome);
 	fastfood->cod_postal = cod_postal;
 	strcpy(fastfood->prov, prov);
@@ -147,9 +148,21 @@ fast *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, doub
 	return fastfood;
 }
 
-void construir_arvore(tarv *arv, int (*compara)(const void *a, const void *b, int index)){
+double compara(const ponto *a, const ponto *b, int index){
+	return (*a).coord[index] - (*b).coord[index];
+}
+
+double distancia(const ponto *a, const ponto *b){
+	double dx = (*a).coord[0] - (*b).coord[0];
+	double dy = (*a).coord[1] - (*b).coord[1];
+
+	return sqrt(dx*dx + dy*dy);
+}
+
+void construir_arvore(tarv *arv){
 	arv->raiz = NULL;
 	arv->compara = compara;
+	arv->distancia = distancia;
 }
 
 void inserir(tarv *arv, treg *new_reg){
@@ -161,7 +174,7 @@ void inserir(tarv *arv, treg *new_reg){
 
 	while(pnode != NULL){
 		index = nivel%2;
-		if(arv->compara(pnode->reg, new_reg, index)){
+		if((arv->compara(pnode->reg, new_reg, index)) < 0){
 			ppnode = &(pnode->dir);
 			pnode = *ppnode;
 		}
@@ -178,4 +191,12 @@ void inserir(tarv *arv, treg *new_reg){
 		(*ppnode)->dir = NULL;
 		(*ppnode)->esq = NULL;
 	}
+}
+
+tnode *vizinho(tarv *arv, point ponto){
+	int nivel = 0, index;
+	tnode **ppnode;
+	tnode *pnode;
+	ppnode = &(arv->raiz);
+	pnode = *ppnode;
 }
