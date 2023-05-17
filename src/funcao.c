@@ -10,8 +10,8 @@ muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int cap
 
 	municipios->cod_ibge = cod_ibge;
 	strcpy(municipios->nome ,nome);
-	municipios->coord.coord[0] = coord0;
-	municipios->coord.coord[1] = coord1; 
+	municipios->coord[0] = coord0;
+	municipios->coord[1] = coord1; 
 	municipios->capital = capital;
 	municipios->codigo_uf = codigo_uf;
 	strcpy(municipios->siafi_id, siafi_id);
@@ -130,51 +130,54 @@ muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int cap
 	return municipios;
 }
 
-fast *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site){
-	fast *fastfood;
-	fastfood = malloc(sizeof(fast));
+muni *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site){
+	muni *municipios;
+	municipios = malloc(sizeof(muni));
 
-	strcpy(fastfood->endereco, endereco);
-	strcpy(fastfood->categoria, categoria);
-	strcpy(fastfood->cidade, cidade);
-	strcpy(fastfood->pais, pais);
-	fastfood->coord.coord[0] = coord0;
-	fastfood->coord.coord[1] = coord1;
-	strcpy(fastfood->nome, nome);
-	fastfood->cod_postal = cod_postal;
-	strcpy(fastfood->prov, prov);
-	strcpy(fastfood->site, site);
+	strcpy(municipios->endereco, endereco);
+	strcpy(municipios->categoria, categoria);
+	strcpy(municipios->cidade, cidade);
+	strcpy(municipios->pais, pais);
+	municipios->coord[0] = coord0;
+	municipios->coord[1] = coord1;
+	strcpy(municipios->nome, nome);
+	municipios->cod_postal = cod_postal;
+	strcpy(municipios->prov, prov);
+	strcpy(municipios->site, site);
 
-	return fastfood;
+	return municipios;
 }
 
-double compara(const ponto *a, const ponto *b, int index){
-	return (*a).coord[index] - (*b).coord[index];
+double compara(const double a, const double b){
+	return a - b;
 }
 
-double distancia(const ponto *a, const ponto *b){
+double distancia(const muni *a, const point *b){
 	double dx = (*a).coord[0] - (*b).coord[0];
 	double dy = (*a).coord[1] - (*b).coord[1];
 
 	return sqrt(dx*dx + dy*dy);
 }
 
-void construir_arvore(tarv *arv){
-	arv->raiz = NULL;
-	arv->compara = compara;
-	arv->distancia = distancia;
+void initialize(tnode **node){
+	*node = NULL;
 }
 
-void inserir(tarv *arv, treg *new_reg){
-	int nivel = 0, index;
+void inserir(tnode **node, treg *new_reg, int nivel){
 	tnode **ppnode;
 	tnode *pnode;
-	ppnode = &(arv->raiz);
+	ppnode = node;
 	pnode = *ppnode;
+	muni *atual;
+	muni *prox;
+	int index;
 
 	while(pnode != NULL){
 		index = nivel%2;
-		if((arv->compara(pnode->reg, new_reg, index)) < 0){
+		atual = (muni *)(pnode->reg);
+		prox= (muni *)new_reg;
+
+		if(compara(atual->coord[index], prox->coord[index]) < 0){
 			ppnode = &(pnode->dir);
 			pnode = *ppnode;
 		}
@@ -191,12 +194,4 @@ void inserir(tarv *arv, treg *new_reg){
 		(*ppnode)->dir = NULL;
 		(*ppnode)->esq = NULL;
 	}
-}
-
-tnode *vizinho(tarv *arv, point ponto){
-	int nivel = 0, index;
-	tnode **ppnode;
-	tnode *pnode;
-	ppnode = &(arv->raiz);
-	pnode = *ppnode;
 }

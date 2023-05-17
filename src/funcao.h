@@ -12,7 +12,7 @@ typedef struct ponto{
 typedef struct municipios{
     int cod_ibge;
     char nome[MIN];
-    point coord;
+    double coord[2];
     int capital;
     int codigo_uf;
     char siafi_id[5];
@@ -20,19 +20,14 @@ typedef struct municipios{
     char fuso_horario[MIN];
     char regiao[15];
     char uf[3];
-}muni;
-
-typedef struct fastfood{
     char endereco[MIN];
     char categoria[MAX];
     char cidade[25];
     char pais[3];
-    point coord;
-    char nome[MIN];
     int cod_postal;
     char prov[3];
     char site[TAM];
-}fast;
+}muni;
 
 typedef void treg;
 
@@ -42,22 +37,16 @@ typedef struct node{
     struct node *esq;
 }tnode;
 
-typedef struct arvore{
-    tnode *raiz;
-}tarv;
-
 muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int capital, int codigo_uf, char *siafi_id, int ddd, char *fuso_horario);
 
-fast *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site);
+muni *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site);
 
-double compara(const ponto *a, const ponto *b, int index);
+double compara(const double a, const double b);
 
-double distancia(const ponto *a, const ponto *b);
+double distancia(const muni *a, const point *b);
 
-void construir_arvore(tarv *arv);
+void initialize(tnode **node);
 
-void inserir(tarv *arv, treg *new_reg);
-
-tnode *vizinho(tarv *arv, point ponto);
+void inserir(tnode **node, treg *new_reg, int nivel);
 
 #endif
