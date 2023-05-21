@@ -262,17 +262,7 @@ void freeNode(tnode *node){
 	}
 }
 
-void imprimir_prob1(tnode *node){
-	if(node != NULL){
-		muni *municipios = (muni *)(node->reg);
-		imprimir_prob1(node->esq);
-		printf("%d, %s, %f, %f, %d, %d, %s, %d, %s, %s, %s\n", municipios->cod_ibge, municipios->nome, municipios->coord[0], municipios->coord[1], 
-		municipios->capital, municipios->codigo_uf, municipios->siafi_id, municipios->ddd,
-		municipios->fuso_horario, municipios->regiao, municipios->uf);
-		imprimir_prob1(node->dir);
-	}
-}
-
+//Função para inicializar vetor de vizinhos
 void initialize_neighbors(vizinho *neighbors, int size){
 	for(int i = 0; i<size; i++){
 		neighbors[i].vizin = NULL;

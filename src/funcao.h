@@ -62,8 +62,6 @@ void ordenar_vizinho(vizinho *neighbors, int i);
 
 void searchNeighbors(tnode *node, point coordenada, vizinho *neighbors, int i, int nivel);
 
-void imprimir_prob1(tnode *node);
-
 void freeNode(tnode *node);
 
 #endif
