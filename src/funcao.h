@@ -29,6 +29,11 @@ typedef struct municipios{
     char site[TAM];
 }muni;
 
+typedef struct neighbors{
+    muni *vizin;
+    double distance;
+}vizinho;
+
 typedef void treg;
 
 typedef struct node{
@@ -48,5 +53,13 @@ double distancia(const muni *a, const point *b);
 void initialize(tnode **node);
 
 void inserir(tnode **node, treg *new_reg, int nivel);
+
+void searchNeighbors(tnode *node, point coordenada, vizinho *neighbors, int i, int nivel);
+
+void ordenar_vizinho(vizinho *neighbors, int i);
+
+void imprimir_prob1(tnode *node);
+
+void freeNode(tnode *node);
 
 #endif

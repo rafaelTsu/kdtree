@@ -6,39 +6,56 @@
 
 int main(){
 	tnode *node;
-	muni *municipios;
 	muni temp;
 	FILE *arq;
+	int option; //option_menu;
 
-	arq = fopen("csv/municipios.csv","r");
+	do{
+		printf("Digite a opção:\n0 - Sair\n1 - Procurar pelos municípios mais próximos do Brasil\n2 - Procurar pelos fastfoods mais próximos\n");
+		scanf("%d",&option);
 
-	if(arq == NULL){
-		printf("Erro ao abrir o arquivo.");
-		exit(1);
-	}
-	else{
+		if(option == 1){
+			arq = fopen("csv/municipios.csv","r");
 
-		initialize(&node);
+			if(arq == NULL){
+				printf("Erro ao abrir o arquivo.");
+				exit(1);
+			}
+			else{
+				initialize(&node);
 
-		while(feof(arq) == 0){
-			fscanf(arq, "%d, %[^,],%lf,%lf,%d,%d, %[^,],%d, %[^\n]", 
-			&temp.cod_ibge, temp.nome, &temp.coord[0], &temp.coord[1], 
-			&temp.capital, &temp.codigo_uf, temp.siafi_id, &temp.ddd,
-			temp.fuso_horario);
+				while(feof(arq) == 0){
+					fscanf(arq, "%d, %[^,],%lf,%lf,%d,%d, %[^,],%d, %[^\n]", 
+					&temp.cod_ibge, temp.nome, &temp.coord[0], &temp.coord[1], 
+					&temp.capital, &temp.codigo_uf, temp.siafi_id, &temp.ddd,
+					temp.fuso_horario);
 
-			inserir(&node, aloca_muni(temp.cod_ibge, temp.nome, temp.coord[0], temp.coord[1], 
-			temp.capital, temp.codigo_uf, temp.siafi_id, temp.ddd,
-			temp.fuso_horario), 0);
-
-			municipios = aloca_muni(temp.cod_ibge, temp.nome, temp.coord[0], temp.coord[1], 
-			temp.capital, temp.codigo_uf, temp.siafi_id, temp.ddd,
-			temp.fuso_horario);
-
-			printf("%d, %s, %f, %f, %d, %d, %s, %d, %s, %s, %s\n", municipios->cod_ibge, municipios->nome, municipios->coord[0], municipios->coord[1], 
-			municipios->capital, municipios->codigo_uf, municipios->siafi_id, municipios->ddd,
-			municipios->fuso_horario, municipios->regiao, municipios->uf);
+					inserir(&node, aloca_muni(temp.cod_ibge, temp.nome, temp.coord[0], temp.coord[1], 
+					temp.capital, temp.codigo_uf, temp.siafi_id, temp.ddd,
+					temp.fuso_horario), 0);
+				}
+			}
 		}
-	}
-	fclose(arq);
+
+		/*else if(option == 2){
+			arq = fopen("csv/Fast_Food_Restaurants_US.csv","r");
+
+			if(arq == NULL){
+				printf("Erro ao abrir o arquivo.");
+				exit(1);
+			}
+			else{
+				initialize(&node);
+
+				while(feof(arq) == 0){
+					fscanf(arq, "%d, %[^,], %[^,], %[^,], %[^,],%lf")
+				}
+			}
+		}*/
+
+		fclose(arq);	
+	}while(option!=0);
+
+
 	return EXIT_SUCCESS;
 }
