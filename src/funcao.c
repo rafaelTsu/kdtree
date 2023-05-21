@@ -202,6 +202,26 @@ void inserir(tnode **node, treg *new_reg, int nivel){
 	}
 }
 
+//Função para ordenar lista dos vizinhos mais próximos
+void ordenar_vizinho(vizinho *neighbors, int n){
+	vizinho aux;
+
+	for(int i = 0; i<n-1; i++){
+		aux.vizin = neighbors[i].vizin;
+		aux.distance = neighbors[i].distance;
+		for(int j = i+1; j<n; j++){
+			if(neighbors[j].distance < aux.distance){
+				neighbors[i].vizin = neighbors[j].vizin;
+				neighbors[i].distance = neighbors[j].distance;
+				neighbors[j].vizin = aux.vizin;
+				neighbors[j].distance = aux.distance;
+				aux.vizin = neighbors[i].vizin;
+				aux.distance = neighbors[i].distance;
+			}
+		}
+	}
+}
+
 
 //Função de busca
 void searchNeighbors(tnode *node, point coordenada, vizinho *neighbors, int i, int nivel){
@@ -232,26 +252,6 @@ void searchNeighbors(tnode *node, point coordenada, vizinho *neighbors, int i, i
 	}
 }
 
-//Função para ordenar lista dos vizinhos mais próximos
-void ordenar_vizinho(vizinho *neighbors, int n){
-	vizinho aux;
-
-	for(int i = 0; i<n-1; i++){
-		aux.vizin = neighbors[i].vizin;
-		aux.distance = neighbors[i].distance;
-		for(int j = i+1; j<n; j++){
-			if(neighbors[j].distance < aux.distance){
-				neighbors[i].vizin = neighbors[j].vizin;
-				neighbors[i].distance = neighbors[j].distance;
-				neighbors[j].vizin = aux.vizin;
-				neighbors[j].distance = aux.distance;
-				aux.vizin = neighbors[i].vizin;
-				aux.distance = neighbors[i].distance;
-			}
-		}
-	}
-}
-
 //Função para destruir a árvore
 void freeNode(tnode *node){
 	if(node != NULL){
@@ -270,5 +270,12 @@ void imprimir_prob1(tnode *node){
 		municipios->capital, municipios->codigo_uf, municipios->siafi_id, municipios->ddd,
 		municipios->fuso_horario, municipios->regiao, municipios->uf);
 		imprimir_prob1(node->dir);
+	}
+}
+
+void initialize_neighbors(vizinho *neighbors, int size){
+	for(int i = 0; i<size; i++){
+		neighbors[i].vizin = NULL;
+		neighbors[i].distance = 1000000000;
 	}
 }
