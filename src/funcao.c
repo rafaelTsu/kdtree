@@ -257,6 +257,7 @@ void freeNode(tnode *node){
 	if(node != NULL){
 		freeNode(node->esq);
 		freeNode(node->dir);
+		free(node->reg);
 		free(node);
 	}
 }
