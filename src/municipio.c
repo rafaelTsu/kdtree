@@ -50,7 +50,7 @@ int main(){
 
 			for(int i = 0; i<size; i++){
 				muni *municipios = (muni *)neighbors[i].vizin;
-				printf("%d° cidade mais perto:\n", i+1);
+				printf("\n%d° cidade mais perto:\n", i+1);
 				printf("Código IBGE: %d\nNome do município: %s\nLatitude: %f\nLongitude: %f\nCapital: %d\nCódigo UF: %d\nSiafi ID: %s\nDDD: %d\nFuso horário: %s\nRegião: %s\nUF: %s\n\n", 
 					municipios->cod_ibge, municipios->nome, municipios->coord[0], municipios->coord[1], 
 					municipios->capital, municipios->codigo_uf, municipios->siafi_id, municipios->ddd,
