@@ -1,7 +1,7 @@
 #ifndef _VIZINHO_
 #define  _VIZINHO_
 
-#define TAM 2000
+#define TAM 20000
 #define MAX 100
 #define MIN 50
 
@@ -35,8 +35,6 @@ typedef struct neighbors{
     treg *vizin;
     double distance;
 }vizinho;
-
-
 
 typedef struct node{
     treg *reg;
