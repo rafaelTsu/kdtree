@@ -5,11 +5,11 @@
 #define MAX 100
 #define MIN 50
 
-typedef struct ponto{
+typedef struct _ponto{
     double coord[2];
 }point;
 
-typedef struct municipios{
+typedef struct _municipios{
     int cod_ibge;
     char nome[MIN];
     double coord[2];
@@ -20,45 +20,65 @@ typedef struct municipios{
     char fuso_horario[MIN];
     char regiao[15];
     char uf[3];
-    char endereco[MIN];
-    char categoria[MAX];
-    char cidade[25];
-    char pais[3];
-    int cod_postal;
-    char prov[3];
-    char site[TAM];
 }muni;
 
-typedef void treg;
+typedef struct _fastfood{
+    char regiao[4];
+    char endereco[MAX];
+    char categoria[MAX];
+    char cidade[MIN];
+    char pais[MIN];
+    char nome[MAX];
+    int cod_postal;
+    char prov[MAX];
+    char site[TAM];
+    double coord[2];
+}tfast;
 
-typedef struct neighbors{
-    treg *vizin;
+typedef struct _node{
+    void *reg;
+    struct _node *pai;
+    struct _node *dir;
+    struct _node *esq;
+}tnode;
+
+typedef struct _neighbors{
+    tnode *vizin;
     double distance;
 }vizinho;
 
-typedef struct node{
-    treg *reg;
-    struct node *dir;
-    struct node *esq;
-}tnode;
+typedef struct _arv{
+    tnode *raiz;
+    double (*compara_x)(const void *a, const void *b);
+    double (*compara_y)(const void *a, const void *b);
+    double (*distancia)(const void *a, const void *b);
+}tarv;
 
 muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int capital, int codigo_uf, char *siafi_id, int ddd, char *fuso_horario);
 
-muni *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site);
+tfast *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site);
 
-double compara(const double a, const double b);
+void initialize(tarv *arv, double (*compara_x)(const void *a, const void *b), double (*compara_y)(const void *a, const void *b), double (*distancia)(const void *a, const void *b));
 
-double distancia(const muni *a, const point *b);
+void inserir(tarv *arv, void *new_reg, int nivel);
 
-void initialize(tnode **node);
+tnode *tree_minimum(tnode *node);
+
+tnode *tree_maximum(tnode *node);
+
+tnode *sucessor(tnode *node);
+
+tnode *antecessor(tnode *node);
 
 void initialize_neighbors(vizinho *neighbors, int size);
 
-void inserir(tnode **node, treg *new_reg, int nivel);
-
 void ordenar_vizinho(vizinho *neighbors, int i);
 
-void searchNeighbors(tnode *node, point coordenada, vizinho *neighbors, int i, int nivel);
+void searchNeighbors(tarv *arv, tnode *node, vizinho *neighbors, int n);
+
+tnode *closest(tarv *arv, tnode *node, tnode *temp, void *coordenada);
+
+tnode *findNearestNeighbor(tarv *arv, tnode *node, void *coordenada, int nivel);
 
 void freeNode(tnode *node);
 

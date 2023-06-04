@@ -131,65 +131,68 @@ muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int cap
 	return municipios;
 }
 
-muni *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site){
-	muni *municipios;
-	municipios = malloc(sizeof(muni));
+tfast *aloca_fast(char *endereco, char *categoria, char *cidade, char *pais, double coord0, double coord1, char *nome, int cod_postal, char *prov, char *site){
+	tfast *fastfood;
+	fastfood = malloc(sizeof(tfast));
 
-	strcpy(municipios->endereco, endereco);
-	strcpy(municipios->categoria, categoria);
-	strcpy(municipios->cidade, cidade);
-	strcpy(municipios->pais, pais);
-	municipios->coord[0] = coord0;
-	municipios->coord[1] = coord1;
-	strcpy(municipios->nome, nome);
-	municipios->cod_postal = cod_postal;
-	strcpy(municipios->prov, prov);
-	strcpy(municipios->site, site);
+	strcpy(fastfood->endereco, endereco);
+	strcpy(fastfood->categoria, categoria);
+	strcpy(fastfood->cidade, cidade);
+	strcpy(fastfood->pais, pais);
+	fastfood->coord[0] = coord0;
+	fastfood->coord[1] = coord1;
+	strcpy(fastfood->nome, nome);
+	fastfood->cod_postal = cod_postal;
+	strcpy(fastfood->prov, prov);
+	strcpy(fastfood->site, site);
 
-	return municipios;
+	return fastfood;
 }
 
-
-//Funções de comparação
-double compara(const double a, const double b){
-	return a - b;
+//Inicia árvores
+void initialize(tarv *arv, double (*compara_x)(const void *a, const void *b), double (*compara_y)(const void *a, const void *b), double (*distancia)(const void *a, const void *b)){
+	arv->raiz = NULL;
+	arv->compara_x = compara_x;
+	arv->compara_y = compara_y;
+	arv->distancia = distancia;
 }
-
-double distancia(const muni *a, const point *b){
-	double dx = (*a).coord[0] - (*b).coord[0];
-	double dy = (*a).coord[1] - (*b).coord[1];
-
-	return sqrt(dx*dx + dy*dy);
-}
-
-//Função para iniciar o nó com NULL
-void initialize(tnode **node){
-	*node = NULL;
-}
-
 
 //Função para inserir o nó na árvore
-void inserir(tnode **node, treg *new_reg, int nivel){
+void inserir(tarv *arv, void *new_reg, int nivel){
 	tnode **ppnode;
 	tnode *pnode;
-	ppnode = node;
+	tnode *ppai = NULL;
+	ppnode = &(arv->raiz);
 	pnode = *ppnode;
-	muni *atual;
-	muni *prox;
 	int index;
 
-	prox= (muni *)new_reg;
 	while(pnode != NULL){
 		index = nivel%2;
-		atual = (muni *)(pnode->reg);
 
-		if(compara(atual->coord[index], prox->coord[index]) < 0){
-			ppnode = &(pnode->dir);
-			pnode = *ppnode;
+		if(index == 0){
+			if(arv->compara_x(pnode->reg, new_reg) < 0){
+				ppai = *ppnode;
+				ppnode = &(pnode->dir);
+				pnode = *ppnode;
+			}
+			else{
+				ppai = *ppnode;
+				ppnode = &(pnode->esq);
+				pnode = *ppnode;
+			}
 		}
+
 		else{
-			ppnode = &(pnode->esq);
-			pnode = *ppnode;
+			if(arv->compara_y(pnode->reg, new_reg) < 0){
+				ppai = *ppnode;
+				ppnode = &(pnode->dir);
+				pnode = *ppnode;
+			}
+			else{
+				ppai = *ppnode;
+				ppnode = &(pnode->esq);
+				pnode = *ppnode;
+			}
 		}
 		nivel++;
 	}
@@ -199,14 +202,59 @@ void inserir(tnode **node, treg *new_reg, int nivel){
 		(*ppnode)->reg = new_reg;
 		(*ppnode)->dir = NULL;
 		(*ppnode)->esq = NULL;
+		(*ppnode)->pai = ppai;
 	}
 }
+
+//Funções de busca do antecessor e sucessor
+tnode *tree_minimum(tnode *node){
+	while(node->esq != NULL){
+		node = node->esq;
+	}
+	return node;
+}
+
+tnode *tree_maximum(tnode *node){
+	while(node->dir != NULL){
+		node = node->dir;
+	}
+	return node;
+}
+
+tnode *sucessor(tnode *node){
+	if(node->dir != NULL){
+		return tree_minimum(node->dir);
+	}
+	else{
+		tnode *ppai = node->pai;
+		while(ppai != NULL && node == ppai->dir){
+			node = ppai;
+			ppai = ppai->pai;
+		}
+		return ppai;
+	}
+}
+
+tnode *antecessor(tnode *node){
+	if(node->esq != NULL){
+		return tree_maximum(node->esq);
+	}
+	else{
+		tnode *ppai = node->pai;
+		while(ppai != NULL && node == ppai->esq){
+			node = ppai;
+			ppai = ppai->pai;
+		}
+		return ppai;
+	}
+}
+
 
 //Função para ordenar lista dos vizinhos mais próximos
 void ordenar_vizinho(vizinho *neighbors, int n){
 	vizinho aux;
 
-	for(int i = 0; i<n-1; i++){
+	for(int i = 1; i<n-1; i++){
 		aux.vizin = neighbors[i].vizin;
 		aux.distance = neighbors[i].distance;
 		for(int j = i+1; j<n; j++){
@@ -222,33 +270,97 @@ void ordenar_vizinho(vizinho *neighbors, int n){
 	}
 }
 
+//Funções de busca
+void searchNeighbors(tarv *arv, tnode *node, vizinho *neighbors, int n){
+	ordenar_vizinho(neighbors, n);
+	tnode *antec = antecessor(node);
+	tnode *suces = sucessor(node);
+	int cont = 1;
+	double ant, suc;
 
-//Função de busca
-void searchNeighbors(tnode *node, point coordenada, vizinho *neighbors, int i, int nivel){
-	if(node != NULL){
-		double distancia_atual = distancia(node->reg, &coordenada);
-
-		if(distancia_atual < neighbors[i-1].distance){
-			neighbors[i-1].vizin = node->reg;
-			neighbors[i-1].distance = distancia_atual;
-			ordenar_vizinho(neighbors, i);
-		}
-
-		muni *atual = (muni *)(node->reg);
-		int index = nivel%2;
-
-		if(compara(atual->coord[index], coordenada.coord[index]) < 0){
-			searchNeighbors(node->dir, coordenada, neighbors, i, nivel+1);
-			if(fabs(coordenada.coord[index] - atual->coord[index]) < neighbors[i-1].distance){
-				searchNeighbors(node->esq, coordenada, neighbors, i, nivel+1);
+	while(cont++ < n){
+		if(suces != NULL){
+			suc = (arv->distancia(node->reg, suces->reg));
+			if(suc < neighbors[n-1].distance){
+				neighbors[n-1].distance = suc;
+				neighbors[n-1].vizin = suces;
+				ordenar_vizinho(neighbors, n);
 			}
+			suces = sucessor(suces);
+		}
+		if(antec != NULL){
+			ant = (arv->distancia(node->reg, antec->reg));
+			if(ant < neighbors[n-1].distance){
+				neighbors[n-1].distance = ant;
+				neighbors[n-1].vizin = antec;
+				ordenar_vizinho(neighbors, n);
+			}
+			antec = antecessor(antec);
+		}
+	}
+}
+
+tnode *closest(tarv *arv, tnode *node, tnode *temp, void *coordenada){
+	if(node == NULL){
+		return temp;
+	}
+	else if(temp == NULL){
+		return node;
+	}
+	else{
+		double dist1 = arv->distancia(node->reg, coordenada);
+		double dist2 = arv->distancia(temp->reg, coordenada);
+		if(dist1 < dist2)
+			return node;
+		else
+			return temp;
+	}
+
+}
+
+tnode *findNearestNeighbor(tarv *arv, tnode *node, void *coordenada, int nivel){
+	if(node == NULL){
+		return NULL;
+	}
+	else{
+		int index = nivel%2;
+		double dist;
+		tnode *pnode_prox = node;
+		tnode *pnode_ant = node;
+		if(index == 0){
+			if(arv->compara_x(node->reg, coordenada) < 0){
+				pnode_prox = node->dir;
+				pnode_ant = node->esq;
+			}
+			else{
+				pnode_prox = node->esq;
+				pnode_ant = node->dir;
+			}
+			dist = arv->compara_x(coordenada, node->reg);
 		}
 		else{
-			searchNeighbors(node->esq, coordenada, neighbors, i, nivel+1);
-			if(fabs(coordenada.coord[index] - atual->coord[index]) < neighbors[i-1].distance){
-				searchNeighbors(node->dir, coordenada, neighbors, i, nivel+1);
+			if(arv->compara_y(node->reg, coordenada) < 0){
+				pnode_prox = node->dir;
+				pnode_ant = node->esq;
 			}
+			else{
+				pnode_prox = node->esq;
+				pnode_ant = node->dir;
+			}
+			dist = arv->compara_y(coordenada, node->reg);
 		}
+
+		tnode *temp = findNearestNeighbor(arv, pnode_prox, coordenada, nivel+1);
+		tnode *bestNode = closest(arv, node, temp, coordenada);
+
+		double euclidiana = arv->distancia(coordenada, bestNode->reg);
+
+		if(euclidiana >= dist*dist){
+			temp = findNearestNeighbor(arv, pnode_ant, coordenada, nivel+1);
+			bestNode = closest(arv, bestNode, temp, coordenada);
+		}
+
+		return bestNode;
 	}
 }
 
@@ -266,6 +378,6 @@ void freeNode(tnode *node){
 void initialize_neighbors(vizinho *neighbors, int size){
 	for(int i = 0; i<size; i++){
 		neighbors[i].vizin = NULL;
-		neighbors[i].distance = 1000000000;
+		neighbors[i].distance = 10000000;
 	}
 }
