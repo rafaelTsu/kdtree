@@ -2,7 +2,7 @@
 #define  _VIZINHO_
 
 #define TAM 20000
-#define MAX 100
+#define MAX 500
 #define MIN 50
 
 typedef struct _ponto{

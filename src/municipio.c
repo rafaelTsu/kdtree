@@ -38,14 +38,16 @@ double distancia_fast(const void *a, const void *b){
 
 int main(){
 	vizinho *neighbors;
+	char descarta;
 	muni *municipios, aux1;
+	muni temp;
+	tfast temp1;
 	tfast *fastfood, aux2;
 	tarv arvMuni, arvFast;
 	tnode *bestNode;
 	FILE *arq;
 	int size;
 	int option;
-	int character;
 
 	arq = fopen("csv/municipios.csv","r");
 
@@ -54,7 +56,6 @@ int main(){
 		exit(1);
 	}
 	else{
-		muni temp;
 		initialize(&arvMuni, comparaMuni_x, comparaMuni_y, distancia_muni);
 		while(feof(arq) == 0){
 			fscanf(arq, "%d, %[^,],%lf,%lf,%d,%d, %[^,],%d, %[^\n]", 
@@ -76,34 +77,32 @@ int main(){
 		exit(1);
 	}
 	else{
-		printf("A");
-		tfast temp;
 		initialize(&arvFast, comparaFast_x, comparaFast_y, distancia_fast);
 		while(feof(arq) == 0){
-			fscanf(arq, "%[^,], %[^,],",
-			temp.regiao, temp.endereco);
+			fscanf(arq, " %[^,]", temp.regiao);
+            fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %[^,]", temp1.endereco);
+            fscanf(arq, "%c", &descarta);
+            fscanf(arq, " %[^,]", temp1.categoria);
+            fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %[^,]", temp1.cidade);
+            fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %[^,]", temp1.pais);
+            fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %lf", &temp1.coord[0]);
+			fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %lf", &temp1.coord[1]);
+			fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %[^,]", temp1.nome);
+			fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %d", &temp1.cod_postal);
+			fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %[^,]", temp1.prov);
+			fscanf(arq, "%c", &descarta);
+			fscanf(arq, " %[^\n]", temp1.site);
 
-			character = getchar();
-
-			if(character == '\"'){
-				fscanf(arq, " %[^\"], %[^,], %[^,],%lf,%lf, %[^,],%d, %[^,], %[^\n]",
-					temp.categoria, temp.cidade, temp.pais, &temp.coord[0], &temp.coord[1], temp.nome, &temp.cod_postal, temp.prov, temp.site);
-			}
-			else{
-				fscanf(arq, " %[^,], %[^,], %[^,],%lf,%lf, %[^,],%d, %[^,], %[^\n]",
-					temp.categoria, temp.cidade, temp.pais, &temp.coord[0], &temp.coord[1], temp.nome, &temp.cod_postal, temp.prov, temp.site);
-			}
-
-			inserir(&arvFast, aloca_fast(temp.endereco, temp.categoria, temp.cidade, temp.pais, temp.coord[0], temp.coord[1], 
-			temp.nome, temp.cod_postal, temp.prov, temp.site), 0);
-
-			/*fastfood = aloca_fast(temp.endereco, temp.categoria, temp.cidade, temp.pais, temp.coord[0], temp.coord[1], 
-			temp.nome, temp.cod_postal, temp.prov, temp.site);
-
-			printf("Address: %s\nCategories: %s\nCity: %s\nCountry: %s\nLatitude: %f\nLongitude: %f\nName: %s\nPostal code: %d\nProvince: %s\nWebsites: %s\n\n", 
-				fastfood->endereco, fastfood->categoria, fastfood->cidade, fastfood->pais, fastfood->coord[0],
-				fastfood->coord[1], fastfood->nome, fastfood->cod_postal,
-				fastfood->prov, fastfood->site);*/
+			inserir(&arvFast, aloca_fast(temp1.endereco, temp1.categoria, temp1.cidade, temp1.pais, temp1.coord[0], temp1.coord[1], 
+			temp1.nome, temp1.cod_postal, temp1.prov, temp1.site), 0);
 		}
 	}
 	fclose(arq);
@@ -115,7 +114,7 @@ int main(){
 		if(option == 1){
 			printf("\nDigite quantos municípios mais próximos deseja buscar:\n");
 			scanf("%d", &size);
-			printf("\nDigite as coordenadas: \n");
+			printf("\nDigite as coordenadas: (Latitude Longitude)\n");
 			scanf("%lf %lf", &aux1.coord[0], &aux1.coord[1]);
 
 			neighbors = malloc(size * sizeof(vizinho));
@@ -134,17 +133,16 @@ int main(){
 					municipios->capital, municipios->codigo_uf, municipios->siafi_id, municipios->ddd,
 					municipios->fuso_horario, municipios->regiao, municipios->uf);
 			}
-
 			free(neighbors);
 		}
 
 		else if(option == 2){
 			printf("\nDigite quantos fastfoods mais próximos deseja buscar:\n");
 			scanf("%d", &size);
-			printf("\nDigite as coordenadas: \n");
+			printf("\nDigite as coordenadas: (Latitude Longitude)\n");
 			scanf("%lf %lf", &aux2.coord[0], &aux2.coord[1]);
 
-			neighbors = malloc(size * sizeof(tfast));
+			neighbors = malloc(size * sizeof(vizinho));
 			initialize_neighbors(neighbors, size);
 
 			bestNode = findNearestNeighbor(&arvFast, arvFast.raiz, &aux2, 0);
@@ -153,7 +151,7 @@ int main(){
 			searchNeighbors(&arvFast, bestNode, neighbors, size);
 
 			for(int i = 0; i<size; i++){
-				fastfood = (tfast *)neighbors[i].vizin;
+				fastfood = (tfast *)((neighbors[i].vizin)->reg);
 				printf("\n%d° fastfood mais perto:\n", i+1);
 				printf("Adress: %s\nCategories: %s\nCity: %s\nLatitude: %f\nLongitude: %f\nName: %s\nPostal code: %d\nProvince: %s\nWebsites: %s\n\n", 
 					fastfood->endereco, fastfood->categoria, fastfood->cidade, fastfood->coord[0],
