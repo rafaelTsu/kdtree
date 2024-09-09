@@ -1,5 +1,3 @@
-//Aluno Rafael Tsutomu Jyoboji
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +6,6 @@
 
 //Alocação dos vetores de struct
 muni *aloca_muni(int cod_ibge, char *nome, double coord0, double coord1, int capital, int codigo_uf, char *siafi_id, int ddd, char *fuso_horario){
-	int x = 0;
 	muni *municipios;
 	municipios = malloc(sizeof(muni));
 
